@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package rng;
+
+service Rng {
+    rpc GenerateRandom (RngRequest) returns (RngResponse) {}
+}
+
+message RngRequest {
+    int32 length = 1;
+}
+
+message RngResponse {
+    string random = 1;
+}

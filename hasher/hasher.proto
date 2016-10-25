@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package hasher;
+
+service Hasher {
+    rpc Hash (HashRequest) returns (HashResponse) {}
+}
+
+message HashRequest {
+    string message = 1;
+}
+
+message HashResponse {
+    string hashedMessage = 1;
+}
