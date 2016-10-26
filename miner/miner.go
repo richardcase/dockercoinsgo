@@ -40,8 +40,7 @@ func (m Miner) Mine() error {
 				continue
 			}
 
-			if strings.HasPrefix(hashedData, "0") {
-				// Coin found)
+			if strings.HasPrefix(hashedData, "123") {
 				fmt.Println("Coin found")
 				m.redisPool.HashSet("wallet", []string{minedData, hashedData}, cache.FOREVER)
 			}

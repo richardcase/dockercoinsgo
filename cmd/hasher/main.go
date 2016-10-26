@@ -1,8 +1,8 @@
 package main
 
 import (
-	"crypto/sha256"
 	"fmt"
+	"hash/fnv"
 	"log"
 	"net"
 
@@ -19,11 +19,9 @@ const (
 type server struct{}
 
 func (s *server) Hash(ctx context.Context, in *pb.HashRequest) (*pb.HashResponse, error) {
-	hash := sha256.New()
-	hash.Write([]byte(in.Message))
-	hashOutput := fmt.Sprintf("%s", sha256.Sum256(nil))
-
-	fmt.Println(hashOutput)
+	h := fnv.New32a()
+	h.Write([]byte(in.Message))
+	hashOutput := fmt.Sprintf("%d", h.Sum32())
 
 	return &pb.HashResponse{HashedMessage: hashOutput}, nil
 }
