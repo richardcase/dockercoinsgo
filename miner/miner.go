@@ -19,13 +19,17 @@ type Miner struct {
 	ClientCertKeyPath string
 	ClientCAPath      string
 	MiningDelay       int
-	redisPool         cache.CacheStore
+	cache             cache.CacheStore
 }
 
 func (m Miner) Mine() error {
 
 	// Open connection to redis
-	m.redisPool = cache.NewRedisCache(m.RedisUrl, "", cache.FOREVER)
+	redisCache, err := cache.NewRedisCache(m.RedisUrl)
+	if err != nil {
+		return fmt.Errorf("Error creating cache: %v\n", err)
+	}
+	m.cache = redisCache
 
 	tickerChan := time.NewTicker(1 * time.Second).C
 
@@ -33,7 +37,6 @@ func (m Miner) Mine() error {
 	go func() {
 		for {
 			if m.MiningDelay > 0 {
-				//var delay time.Duration = m.MiningDelay * int(time.Millisecond)
 				delay := time.Duration(m.MiningDelay) * time.Millisecond
 				time.Sleep(delay)
 			}
@@ -51,7 +54,7 @@ func (m Miner) Mine() error {
 
 			if strings.HasPrefix(hashedData, "123") {
 				fmt.Println("Coin found")
-				m.redisPool.HashSet("wallet", []string{minedData, hashedData}, cache.FOREVER)
+				m.cache.HashSet("wallet", []string{minedData, hashedData})
 			}
 
 			workDoneChan <- true
@@ -63,8 +66,10 @@ func (m Miner) Mine() error {
 		select {
 		case <-tickerChan:
 			fmt.Printf("%d units of work done, updating hash counter\n", workCount)
-			//TODO increment hash counter
-			m.redisPool.Increment("hashes", uint64(workCount))
+			_, err := m.cache.Increment("hashes", uint64(workCount))
+			if err != nil {
+				fmt.Printf("Error storing in cache: %v\n", err)
+			}
 
 			workCount = 0
 

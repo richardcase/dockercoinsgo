@@ -15,9 +15,11 @@ $GOPATH/bin/hasher -cert=$(pwd)/../../certs/localhost:50051.crt -key=$(pwd)/../.
 RNG
 $GOPATH/bin/rng -cert=$(pwd)/../../certs/localhost:50052.crt -key=$(pwd)/../../certs/localhost:50052.key -ca=$(pwd)/../../certs/ca.crt
 
-REDIS - TODO
+REDIS
+docker run --name some-redis -p 6379:6379 -d redis
 
 WORKER
 $GOPATH/bin/worker -cert=$(pwd)/../../certs/client0.crt -key=$(pwd)/../../certs/client0.key -ca=$(pwd)/../../certs/ca.crt
 
-UI - TODO
+UI
+DCKR_WEB_STATIC=$(pwd)/../../webui DCKR_CACHE_ADDR=localhost:6379 $GOPATH/bin/webui

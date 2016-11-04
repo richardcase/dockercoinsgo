@@ -7,7 +7,9 @@ import (
 )
 
 func main() {
-	hasherAddr := flag.String("hash-addr", "localhost:50051", "The published hostname of the service")
+	hasherAddr := flag.String("hash-addr", "localhost:50051", "The published address of the hasher service")
+	rngAddr := flag.String("rng-addr", "localhost:50052", "The published address of the rng service")
+	cacheAddr := flag.String("cache-addr", "localhost:6379", "The published address of the cache")
 	clientCert := flag.String("cert", "", "[Required]. Path to the certificate for the file")
 	clientKey := flag.String("key", "", "[Required]. Path to the certificate key")
 	clientCA := flag.String("ca", "", "[Required]. Path to the CA file")
@@ -16,9 +18,9 @@ func main() {
 
 	miner := miner.Miner{
 		IntervalInSeconds: 1,
-		RedisUrl:          "localhost:6379",
+		RedisUrl:          *cacheAddr,
 		HasherUrl:         *hasherAddr,
-		RngUrl:            "localhost:50052",
+		RngUrl:            *rngAddr,
 		ClientCertPath:    *clientCert,
 		ClientCertKeyPath: *clientKey,
 		ClientCAPath:      *clientCA,

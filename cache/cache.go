@@ -1,14 +1,6 @@
 package cache
 
-import (
-	"errors"
-	"time"
-)
-
-const (
-	DEFAULT = time.Duration(0)
-	FOREVER = time.Duration(-1)
-)
+import "errors"
 
 var (
 	ErrCacheMiss  = errors.New("cache: key not found.")
@@ -17,13 +9,11 @@ var (
 )
 
 type CacheStore interface {
-	Get(key string, value interface{}) error
-	Set(key string, value interface{}, expire time.Duration) error
-	Add(key string, value interface{}, expire time.Duration) error
-	Replace(key string, data interface{}, expire time.Duration) error
+	GetString(key string) (string, error)
+	GetInt(key string) (int, error)
+	Set(key string, value interface{}) error
 	Delete(key string) error
 	Increment(key string, data uint64) (uint64, error)
 	Decrement(key string, data uint64) (uint64, error)
-	Flush() error
-	HashSet(key string, values []string, expire time.Duration) error
+	HashSet(key string, values []string) error
 }

@@ -31,14 +31,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	coinsCache := cache.NewRedisCache(cacheAddress, "", cache.FOREVER)
+	coinsCache, _ := cache.NewRedisCache(cacheAddress)
 
 	router := gin.Default()
 
 	router.GET("/json", func(c *gin.Context) {
-		//TODO: get details from cache
-		var numHashes = new(int)
-		err := coinsCache.Get("hashes", numHashes)
+		val, err := coinsCache.GetInt("hashes")
 		if err != nil {
 			log.Printf("Error getting hashes from the cache: %v\n", err)
 			c.AbortWithStatus(http.StatusInternalServerError)
@@ -46,7 +44,7 @@ func main() {
 		}
 
 		t := time.Now()
-		summary := Summary{Coins: "", Hashes: *numHashes, Now: t.Unix()}
+		summary := Summary{Coins: "", Hashes: val, Now: t.Unix()}
 		c.JSON(http.StatusOK, summary)
 	})
 
