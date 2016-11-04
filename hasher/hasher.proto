@@ -1,10 +1,7 @@
 syntax = "proto3";
-
 package hasher;
 
-service Hasher {
-    rpc Hash (HashRequest) returns (HashResponse) {}
-}
+import "google/api/annotations.proto";
 
 message HashRequest {
     string message = 1;
@@ -12,4 +9,13 @@ message HashRequest {
 
 message HashResponse {
     string hashedMessage = 1;
+}
+
+service Hasher {
+    rpc Hash (HashRequest) returns (HashResponse) {
+        option (google.api.http) = {
+            post: "/v1/hash"
+            body: "*"
+        };
+    }
 }

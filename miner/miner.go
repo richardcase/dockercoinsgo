@@ -15,6 +15,10 @@ type Miner struct {
 	RedisUrl          string
 	HasherUrl         string
 	RngUrl            string
+	ClientCertPath    string
+	ClientCertKeyPath string
+	ClientCAPath      string
+	MiningDelay       int
 	redisPool         cache.CacheStore
 }
 
@@ -28,7 +32,12 @@ func (m Miner) Mine() error {
 	workDoneChan := make(chan bool)
 	go func() {
 		for {
-			time.Sleep(time.Millisecond * 100)
+			if m.MiningDelay > 0 {
+				//var delay time.Duration = m.MiningDelay * int(time.Millisecond)
+				delay := time.Duration(m.MiningDelay) * time.Millisecond
+				time.Sleep(delay)
+			}
+
 			minedData, err := m.getRandomBytes()
 			if err != nil {
 				fmt.Printf("WARN: Error getting random bytes: %v\n", err)
@@ -66,7 +75,7 @@ func (m Miner) Mine() error {
 }
 
 func (m Miner) getRandomBytes() (string, error) {
-	client := rc.GrpcRngClient{ServerAddress: m.RngUrl}
+	client := rc.GrpcRngClient{ServerAddress: m.RngUrl, CertFile: m.ClientCertPath, KeyFile: m.ClientCertKeyPath, CAFile: m.ClientCAPath}
 	data, err := client.GenerateRandomString(32)
 	if err != nil {
 		return "", err
@@ -76,7 +85,7 @@ func (m Miner) getRandomBytes() (string, error) {
 }
 
 func (m Miner) hashData(data string) (string, error) {
-	client := hc.GrpcHasherClient{ServerAddress: m.HasherUrl}
+	client := hc.GrpcHasherClient{ServerAddress: m.HasherUrl, CertFile: m.ClientCertPath, KeyFile: m.ClientCertKeyPath, CAFile: m.ClientCAPath}
 	hashed, err := client.Hash(data)
 	if err != nil {
 		return "", err

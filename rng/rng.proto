@@ -1,10 +1,7 @@
 syntax = "proto3";
-
 package rng;
 
-service Rng {
-    rpc GenerateRandom (RngRequest) returns (RngResponse) {}
-}
+import "google/api/annotations.proto";
 
 message RngRequest {
     int32 length = 1;
@@ -12,4 +9,13 @@ message RngRequest {
 
 message RngResponse {
     string random = 1;
+}
+
+service Rng {
+    rpc GenerateRandom (RngRequest) returns (RngResponse) {
+        option (google.api.http) = {
+            post: "/v1/rng"
+            body: "*"
+        };
+    }
 }

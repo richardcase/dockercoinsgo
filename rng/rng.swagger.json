@@ -1,0 +1,65 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "rng.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/rng": {
+      "post": {
+        "operationId": "GenerateRandom",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/rngRngResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/rngRngRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Rng"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "rngRngRequest": {
+      "type": "object",
+      "properties": {
+        "length": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "rngRngResponse": {
+      "type": "object",
+      "properties": {
+        "random": {
+          "type": "string",
+          "format": "string"
+        }
+      }
+    }
+  }
+}
