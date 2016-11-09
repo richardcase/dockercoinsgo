@@ -34,14 +34,15 @@ after_success:
     - docker tag $REPO_RNG:$COMMIT $REPO_RNG:$TAG
     - docker tag $REPO_RNG:$COMMIT $REPO_RNG:travis-$TRAVIS_BUILD_NUMBER
     - docker push $REPO_RNG
-    - docker build -f  Dockerfile-webui -t $REPO_WEB:$COMMIT .
-    - docker tag $REPO_WEB:$COMMIT $REPO_WEB:$TAG
-    - docker tag $REPO_WEB:$COMMIT $REPO_WEB:travis-$TRAVIS_BUILD_NUMBER
-    - docker push $REPO_WEB
     - docker build -f  Dockerfile-worker -t $REPO_WORK:$COMMIT .
     - docker tag $REPO_WORK:$COMMIT $REPO_WORK:$TAG
     - docker tag $REPO_WORK:$COMMIT $REPO_WORK:travis-$TRAVIS_BUILD_NUMBER
     - docker push $REPO_WORK
+    - cp -avr ../../webui ./build/webcontent
+    - docker build -f  Dockerfile-webui -t $REPO_WEB:$COMMIT .
+    - docker tag $REPO_WEB:$COMMIT $REPO_WEB:$TAG
+    - docker tag $REPO_WEB:$COMMIT $REPO_WEB:travis-$TRAVIS_BUILD_NUMBER
+    - docker push $REPO_WEB
 
 env:
     global:
