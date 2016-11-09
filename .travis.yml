@@ -1,0 +1,50 @@
+sudo: required
+dist: trusty
+
+language: go
+
+go:
+    - 1.7.3
+
+services:
+    - docker
+
+install:
+    - go get github.com/richardcase/dockercoinsgo
+    - CGO_ENABLED=0 GOOS=linux go build -a -o deployment/docker/build/rng github.com/richardcase/dockercoinsgo/cmd/rng
+	- CGO_ENABLED=0 GOOS=linux go build -a -o deployment/docker/build/hasher github.com/richardcase/dockercoinsgo/cmd/hasher
+	- CGO_ENABLED=0 GOOS=linux go build -a -o deployment/docker/build/worker github.com/richardcase/dockercoinsgo/cmd/worker
+	- CGO_ENABLED=0 GOOS=linux go build -a -o deployment/docker/build/webui github.com/richardcase/dockercoinsgo/cmd/webui
+
+
+script:
+    - echo "No tests"
+
+after_success:
+    - export REPO_HASH=richardcase/dockercoinsgo-hasher
+    - export REPO_RNG=richardcase/dockercoinsgo-rng
+    - export REPO_WEB=richardcase/dockercoinsgo-webui
+    - export REPO_WORK=richardcase/dockercoinsgo-worker
+    - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
+    - docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+    - cd deployment/docker/
+    - docker build -f  Dockerfile-hasher -t $REPO_HASH:$COMMIT .
+    - docker tag $REPO_HASH:$COMMIT $REPO_HASH:$TAG
+    - docker tag $REPO_HASH:$COMMIT $REPO_HASH:travis-$TRAVIS_BUILD_NUMBER
+    - docker push $REPO_HASH
+    - docker build -f  Dockerfile-rng -t $REPO_RNG:$COMMIT .
+    - docker tag $REPO_RNG:$COMMIT $REPO_RNG:$TAG
+    - docker tag $REPO_RNG:$COMMIT $REPO_RNG:travis-$TRAVIS_BUILD_NUMBER
+    - docker push $REPO_RNG
+    - docker build -f  Dockerfile-webui -t $REPO_WEB:$COMMIT .
+    - docker tag $REPO_WEB:$COMMIT $REPO_WEB:$TAG
+    - docker tag $REPO_WEB:$COMMIT $REPO_WEB:travis-$TRAVIS_BUILD_NUMBER
+    - docker push $REPO_WEB
+    - docker build -f  Dockerfile-worker -t $REPO_WORK:$COMMIT .
+    - docker tag $REPO_WORK:$COMMIT $REPO_WORK:$TAG
+    - docker tag $REPO_WORK:$COMMIT $REPO_WORK:travis-$TRAVIS_BUILD_NUMBER
+    - docker push $REPO_WORK
+
+env:
+    global:
+        - COMMIT=${TRAVIS_COMMIT::8}
