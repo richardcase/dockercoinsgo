@@ -1,0 +1,14 @@
+FROM scratch
+
+# Bundle app 
+ADD build/hasher /hasher
+
+# Add certificates
+ADD ./certs/ca.crt /certs/ca.crt
+ADD ./certs/hasher:50051.key /certs/hasher:50051.key
+ADD ./certs/hasher:50051.crt /certs/hasher:50051.crt
+
+EXPOSE 50051
+
+ENTRYPOINT ["/hasher"]
+CMD ["-cert=/certs/hasher:50051.crt", "-key=/certs/hasher:50051.key", "-ca=/certs/ca.crt", "-hostname=hasher"]

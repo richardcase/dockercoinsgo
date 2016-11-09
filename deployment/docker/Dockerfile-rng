@@ -1,0 +1,14 @@
+FROM scratch
+
+# Bundle app 
+ADD build/rng /
+
+# Add certificates
+ADD ./certs/ca.crt /certs/ca.crt
+ADD ./certs/rng:50052.key /certs/rng:50052.key
+ADD ./certs/rng:50052.crt /certs/rng:50052.crt
+
+EXPOSE 50052
+
+ENTRYPOINT ["/rng"]
+CMD ["-cert=/certs/rng:50052.crt", "-key=/certs/rng:50052.key", "-ca=/certs/ca.crt", "-hostname=rng"]

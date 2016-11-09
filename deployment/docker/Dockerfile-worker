@@ -1,0 +1,12 @@
+FROM scratch
+
+# Bundle app 
+ADD build/worker /
+
+# Add certificates
+ADD ./certs/ca.crt /certs/ca.crt
+ADD ./certs/client-worker.key /certs/client-worker.key
+ADD ./certs/client-worker.crt /certs/client-worker.crt
+
+ENTRYPOINT ["/worker"]
+CMD ["-cert=/certs/client-worker.crt", "-key=/certs/client-worker.key", "-ca=/certs/ca.crt", "-hash-addr=hasher:50051", "-rng-addr=rng:50052", "-cache-addr=redis:6379"]

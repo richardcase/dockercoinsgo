@@ -1,0 +1,53 @@
+version: "2"
+
+services:
+  rng:
+    image: richardcase/dockercoinsgo-rng
+    ports:
+      - "50052"
+    networks:
+      - backend
+    depends_on:
+      - redis
+
+  hasher:
+    image: richardcase/dockercoinsgo-hasher
+    ports:
+      - "50051"
+    networks:
+      - backend
+    depends_on:
+      - redis
+
+  webui:
+    image: richardcase/dockercoinsgo-webui
+    ports:
+      - "8000:8000"
+    environment:
+      - DCKR_CACHE_ADDR=redis:6379
+      - DCKR_WEB_STATIC=/webcontent/
+    networks:
+      - frontend
+    depends_on:
+      - redis
+
+  redis:
+    image: redis
+    ports: 
+      - "6379"
+    networks:
+      - backend
+      - frontend
+
+  worker:
+    image: richardcase/dockercoinsgo-worker
+    networks:
+      - backend
+    depends_on:
+      - redis
+      - rng
+      - hasher
+
+networks:
+  backend:
+  frontend:

@@ -1,0 +1,11 @@
+FROM scratch
+
+# Bundle app 
+ADD build/webui /
+
+# Copy the static website
+COPY ./build/webcontent/ /webcontent/
+
+EXPOSE 8000
+
+CMD ["/webui"]
