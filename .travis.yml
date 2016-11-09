@@ -17,7 +17,6 @@ install:
 	- CGO_ENABLED=0 GOOS=linux go build -a -o deployment/docker/build/worker github.com/richardcase/dockercoinsgo/cmd/worker
 	- CGO_ENABLED=0 GOOS=linux go build -a -o deployment/docker/build/webui github.com/richardcase/dockercoinsgo/cmd/webui
 
-
 script:
     - echo "No tests"
 
