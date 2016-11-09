@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/richardcase/dockercoinsgo.svg?branch=master)](https://travis-ci.org/richardcase/dockercoinsgo)
+
 # Docker Coins using Go
 
 A Go port of https://github.com/jpetazzo/orchestration-workshop/tree/master/dockercoins
