@@ -25,3 +25,9 @@ $GOPATH/bin/worker -cert=$(pwd)/../../certs/client0.crt -key=$(pwd)/../../certs/
 
 UI
 DCKR_WEB_STATIC=$(pwd)/../../webui DCKR_CACHE_ADDR=localhost:6379 $GOPATH/bin/webui
+
+# Perf testing
+
+ab -n 100000 -c 20 -T application/json -p ~/rng.json  https://localhost:500
+52/v1/rng
+
