@@ -14,6 +14,7 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
+	"time"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -25,14 +26,15 @@ import (
 )
 
 var (
-	rngKeyPair  *tls.Certificate
-	rngCertPool *x509.CertPool
-	rngPort     *int
-	rngHostname *string
-	rngAddr     string
-	rngCert     *string
-	rngKey      *string
-	rngCA       *string
+	rngKeyPair    *tls.Certificate
+	rngCertPool   *x509.CertPool
+	rngPort       *int
+	rngHostname   *string
+	rngAddr       string
+	rngCert       *string
+	rngKey        *string
+	rngCA         *string
+	shutdownDelay *int
 )
 
 type server struct {
@@ -48,15 +50,26 @@ func (s *server) GenerateRandom(ctx context.Context, in *pb.RngRequest) (*pb.Rng
 	return &pb.RngResponse{Random: generated}, nil
 }
 
-func (s *server) Shutdown() {
-	fmt.Printf("Shutting down.")
+func (s *server) SignalShutdown() {
 	s.isShuttingDown = true
-	//TODO: Wait
+	delay := time.Duration(*shutdownDelay) * time.Second
+	timer := time.NewTimer(delay)
+	go func() {
+		<-timer.C
+		fmt.Printf("Shutdown delay expired. Shutting down.\n")
+		os.Exit(0)
+	}()
 }
 
 func (s *server) HealthCheck(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(" Health check: OK"))
+	if s.isShuttingDown == false {
+		//NOTE: you would do other checks here if we are not shutting down
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Health check: OK"))
+	} else {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Health check: NOT OK"))
+	}
 }
 
 func grpcHandlerFunc(grpcServer *grpc.Server, otherHandler http.Handler) http.Handler {
@@ -75,6 +88,8 @@ func main() {
 	rngCert := flag.String("cert", "", "[Required]. Path to the certificate for the file")
 	rngKey := flag.String("key", "", "[Required]. Path to the certificate key")
 	rngCA := flag.String("ca", "", "[Required]. Path to the CA file")
+	shutdownDelay = flag.Int("shut-delay", 4, "The delay in seconds to wait when sutting down")
+
 	flag.Parse()
 
 	if *rngCert == "" {
@@ -121,8 +136,8 @@ func main() {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		serv.Shutdown()
-		os.Exit(1)
+		fmt.Printf("SIGTERM received: Signalling shutdown\n")
+		serv.SignalShutdown()
 	}()
 
 	opts := []grpc.ServerOption{
