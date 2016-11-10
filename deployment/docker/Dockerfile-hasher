@@ -12,3 +12,17 @@ EXPOSE 50051
 
 ENTRYPOINT ["/hasher"]
 CMD ["-cert=/certs/hasher:50051.crt", "-key=/certs/hasher:50051.key", "-ca=/certs/ca.crt", "-hostname=hasher"]
+
+# Build-time metadata as defined at http://label-schema.org
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VERSION
+LABEL org.label-schema.build-date=$BUILD_DATE \
+    org.label-schema.name="DockerCoins Go Hashing Service" \
+    org.label-schema.description="String hashing service." \
+    org.label-schema.url="https://github.com/richardcase/dockercoinsgo" \
+    org.label-schema.vcs-ref=$VCS_REF \
+    org.label-schema.vcs-url="https://github.com/richardcase/dockercoinsgo" \
+    org.label-schema.vendor="Richard Case" \
+    org.label-schema.version=$VERSION \
+    org.label-schema.schema-version="1.0"

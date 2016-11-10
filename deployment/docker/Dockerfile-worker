@@ -10,3 +10,17 @@ ADD ./certs/client-worker.crt /certs/client-worker.crt
 
 ENTRYPOINT ["/worker"]
 CMD ["-cert=/certs/client-worker.crt", "-key=/certs/client-worker.key", "-ca=/certs/ca.crt", "-hash-addr=hasher:50051", "-rng-addr=rng:50052", "-cache-addr=redis:6379"]
+
+# Build-time metadata as defined at http://label-schema.org
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VERSION
+LABEL org.label-schema.build-date=$BUILD_DATE \
+    org.label-schema.name="DockerCoins Go Worker" \
+    org.label-schema.description="A service to mine DockerCoins" \
+    org.label-schema.url="https://github.com/richardcase/dockercoinsgo" \
+    org.label-schema.vcs-ref=$VCS_REF \
+    org.label-schema.vcs-url="https://github.com/richardcase/dockercoinsgo" \
+    org.label-schema.vendor="Richard Case" \
+    org.label-schema.version=$VERSION \
+    org.label-schema.schema-version="1.0"

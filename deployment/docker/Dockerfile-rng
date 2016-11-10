@@ -12,3 +12,17 @@ EXPOSE 50052
 
 ENTRYPOINT ["/rng"]
 CMD ["-cert=/certs/rng:50052.crt", "-key=/certs/rng:50052.key", "-ca=/certs/ca.crt", "-hostname=rng"]
+
+# Build-time metadata as defined at http://label-schema.org
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VERSION
+LABEL org.label-schema.build-date=$BUILD_DATE \
+    org.label-schema.name="DockerCoins Go Random String Service" \
+    org.label-schema.description="Service to generate a random string" \
+    org.label-schema.url="https://github.com/richardcase/dockercoinsgo" \
+    org.label-schema.vcs-ref=$VCS_REF \
+    org.label-schema.vcs-url="https://github.com/richardcase/dockercoinsgo" \
+    org.label-schema.vendor="Richard Case" \
+    org.label-schema.version=$VERSION \
+    org.label-schema.schema-version="1.0"
