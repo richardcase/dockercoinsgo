@@ -53,5 +53,3 @@ after_success:
 env:
     global:
         - COMMIT=${TRAVIS_COMMIT::8}
-
---build-arg BUILD_DATE=$BUILDDATE --build-arg VCS_REF=$COMMIT --build-arg VERSION=$VERSION
