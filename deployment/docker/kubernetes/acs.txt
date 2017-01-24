@@ -1,0 +1,55 @@
+# If creating the service principal manually see:
+# https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal
+
+# Create SSH keys to use
+# Use the github public key
+
+# Create a new k8s cluster
+az acs create -n dockercoins-cluster -g dockercoins -d rmc-dockercoins --orchestrator-type kubernetes
+
+# Install kubectl
+az acs kubernetes install-cli
+
+# Get k8s credentials
+#az acs kubernetes get-credentials --dns-prefix=rmc-dockercoins --location=westeurope --user azureuser
+# the above fails on windows. So use WinSCP to copy the files
+#pscp azureuser@MASTERFQDN:.kube/config .
+#  SET KUBECONFIG=%CD%\config
+#  kubectl get nodes
+
+# To create a config map of the certs
+kubectl create configmap certs-config --from-file=./certs
+kubectl get configmaps certs-config -o yaml > certs_config.yaml
+
+# Start the test container
+#kubectl run acstest-api --image richardcase/acstest-api:1.0.0
+
+# Create the replication SET
+kubectl create -f api-replicaset.yaml
+
+# Create the horizontal pod autoscaler
+kubectl create -f api-rs-scaler.yaml
+
+# Check the pods
+kubectl get pods
+
+# Get the name of the deployments
+kubectl get deployments
+
+# Expose via load balancer
+kubectl expose deployments acstest-api --port=80 --type=LoadBalancer
+
+# Watch fpr the service to be exposed
+# External-ip will change from pending
+kubectl get svc
+
+# Start the local proxy
+kubectl proxy
+
+# Then open browser to http://127.0.0.1:8001/api/v1/proxy/namespaces/kube-system/services/kubernetes-dashboard/#/workload?namespace=default
+
+
+
+
+# Delete cluster
+az acs delete -n pricing-cluster -g acstest

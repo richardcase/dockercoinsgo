@@ -2,6 +2,9 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: rng
+  labels:
+    app: rng
+    tier: backend
 spec:
   replicas: 1
   # Update pods with rolling update
@@ -19,6 +22,10 @@ spec:
       containers:
       - name: rng
         image: richardcase/dockercoinsgo-rng:latest
+        command: ["/rng", "-cert=/certs/rng_50052.crt", "-key=/certs/rng_50052.key", "-ca=/certs/ca.crt", "-hostname=rng"]
+        volumeMounts:
+        - name: certs-volume
+          mountPath: /certs
         # ReadinessProbe: indicates whether the container is ready to service requests.
         # If the ReadinessProbe fails, the endpoints controller will remove the
         # pod’s IP address from the endpoints of all services that match the pod.
@@ -58,3 +65,14 @@ spec:
         # Pod (app instance) listens on this port
         ports:
           - containerPort: 50052
+      volumes:
+        - name: certs-volume
+          configMap:
+            name: certs-config
+            items:
+            - key: ca.crt
+              path: ca.crt
+            - key: rng_50052.crt
+              path: rng_50052.crt
+            - key: rng_50052.key
+              path: rng_50052.key
