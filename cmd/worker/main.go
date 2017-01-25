@@ -14,6 +14,8 @@ func main() {
 	clientKey := flag.String("key", "", "[Required]. Path to the certificate key")
 	clientCA := flag.String("ca", "", "[Required]. Path to the CA file")
 	miningDelay := flag.Int("delay", 100, "Delay in milliseconds between mining iterations. 100ms by default.")
+	cachePassword := flag.String("cache-pwd", "", "Password to use when connecting to the cache")
+
 	flag.Parse()
 
 	miner := miner.Miner{
@@ -25,6 +27,7 @@ func main() {
 		ClientCertKeyPath: *clientKey,
 		ClientCAPath:      *clientCA,
 		MiningDelay:       *miningDelay,
+		CachePassword:     *cachePassword,
 	}
 
 	err := miner.Mine()

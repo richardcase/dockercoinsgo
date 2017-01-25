@@ -10,10 +10,17 @@ type RedisStore struct {
 	client *redis.Client
 }
 
-func NewRedisCache(host string) (*RedisStore, error) {
+func NewRedisCache(host string, password string) (*RedisStore, error) {
 	client, err := redis.Dial("tcp", host)
 	if err != nil {
 		return nil, fmt.Errorf("Error connecting to redis: %v\n", err)
+	}
+
+	if password != "" {
+		if err = client.Cmd("AUTH", password).Err; err != nil {
+			client.Close()
+			return nil, err
+		}
 	}
 
 	return &RedisStore{client}, nil

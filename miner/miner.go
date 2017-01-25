@@ -19,13 +19,14 @@ type Miner struct {
 	ClientCertKeyPath string
 	ClientCAPath      string
 	MiningDelay       int
+	CachePassword     string
 	cache             cache.CacheStore
 }
 
 func (m Miner) Mine() error {
 
 	// Open connection to redis
-	redisCache, err := cache.NewRedisCache(m.RedisUrl)
+	redisCache, err := cache.NewRedisCache(m.RedisUrl, m.CachePassword)
 	if err != nil {
 		return fmt.Errorf("Error creating cache: %v\n", err)
 	}
