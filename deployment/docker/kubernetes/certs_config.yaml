@@ -237,5 +237,4 @@ data:
     -----END PRIVATE KEY-----
 kind: ConfigMap
 metadata:
-  creationTimestamp: 2017-01-24T16:52:21Z
   name: certs-config
