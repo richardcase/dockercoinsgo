@@ -23,9 +23,6 @@ services:
     image: richardcase/dockercoinsgo-webui
     ports:
       - "8000:8000"
-    environment:
-      - DCKR_CACHE_ADDR=redis:6379
-      - DCKR_WEB_STATIC=/webcontent/
     networks:
       - frontend
     depends_on:
