@@ -26,15 +26,17 @@ import (
 )
 
 var (
-	rngKeyPair    *tls.Certificate
-	rngCertPool   *x509.CertPool
-	rngPort       *int
-	rngHostname   *string
-	rngAddr       string
-	rngCert       *string
-	rngKey        *string
-	rngCA         *string
-	shutdownDelay *int
+	rngKeyPair      *tls.Certificate
+	rngCertPool     *x509.CertPool
+	rngPort         *int
+	rngCertHostname *string
+	rngCertAddr     string
+	rngLocalAddr    string
+	rngPortAddr     string
+	rngCert         *string
+	rngKey          *string
+	rngCA           *string
+	shutdownDelay   *int
 )
 
 type server struct {
@@ -84,7 +86,7 @@ func grpcHandlerFunc(grpcServer *grpc.Server, otherHandler http.Handler) http.Ha
 
 func main() {
 	rngPort := flag.Int("port", 50052, "The port number to expose the server on")
-	rngHostname := flag.String("hostname", "localhost", "The published hostname of the service")
+	rngCertHostname := flag.String("certhostname", "localhost", "The published hostname of the service used for the certs")
 	rngCert := flag.String("cert", "", "[Required]. Path to the certificate for the file")
 	rngKey := flag.String("key", "", "[Required]. Path to the certificate key")
 	rngCA := flag.String("ca", "", "[Required]. Path to the CA file")
@@ -113,7 +115,9 @@ func main() {
 		os.Exit(2)
 	}*/
 
-	rngAddr = fmt.Sprintf("%s:%d", *rngHostname, *rngPort)
+	rngCertAddr = fmt.Sprintf("%s:%d", *rngCertHostname, *rngPort)
+	rngLocalAddr = fmt.Sprintf("localhost:%d", *rngPort)
+	rngPortAddr = fmt.Sprintf(":%d", *rngPort)
 
 	pair, err := certs.LoadCertificatesFromFile(*rngCert, *rngKey)
 	if err != nil {
@@ -141,14 +145,14 @@ func main() {
 	}()
 
 	opts := []grpc.ServerOption{
-		grpc.Creds(credentials.NewClientTLSFromCert(rngCertPool, rngAddr))}
+		grpc.Creds(credentials.NewClientTLSFromCert(rngCertPool, rngCertAddr))}
 
 	s := grpc.NewServer(opts...)
 	pb.RegisterRngServer(s, serv)
 	ctx := context.Background()
 
 	dcreds := credentials.NewTLS(&tls.Config{
-		ServerName: rngAddr,
+		ServerName: rngCertAddr,
 		RootCAs:    rngCertPool,
 	})
 	dopts := []grpc.DialOption{grpc.WithTransportCredentials(dcreds)}
@@ -157,7 +161,7 @@ func main() {
 	mux.HandleFunc("/health", serv.HealthCheck)
 
 	gwmux := runtime.NewServeMux()
-	err = pb.RegisterRngHandlerFromEndpoint(ctx, gwmux, rngAddr, dopts)
+	err = pb.RegisterRngHandlerFromEndpoint(ctx, gwmux, rngLocalAddr, dopts)
 	if err != nil {
 		fmt.Printf("serve: %v\n", err)
 		return
@@ -165,14 +169,14 @@ func main() {
 
 	mux.Handle("/", gwmux)
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *rngPort))
+	lis, err := net.Listen("tcp", rngPortAddr)
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 		return
 	}
 
 	srv := &http.Server{
-		Addr:    rngAddr,
+		Addr:    rngPortAddr,
 		Handler: grpcHandlerFunc(s, mux),
 		TLSConfig: &tls.Config{
 			Certificates: []tls.Certificate{*rngKeyPair},
