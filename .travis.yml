@@ -38,18 +38,18 @@ after_success:
     - docker build -f  Dockerfile-rng -t $REPO_RNG:$COMMIT --build-arg BUILD_DATE=$BUILDDATE --build-arg VCS_REF=$COMMIT --build-arg VERSION=$VERSION .
     - docker tag $REPO_RNG:$COMMIT $REPO_RNG:$TAG
     - docker tag $REPO_RNG:$COMMIT $REPO_RNG:travis-$TRAVIS_BUILD_NUMBER
-    - docker tag $REPO_HASH:$COMMIT $REPO_HASH:$VERSION
+    - docker tag $REPO_RNG:$COMMIT $REPO_RNG:$VERSION
     - docker push $REPO_RNG
     - docker build -f  Dockerfile-worker -t $REPO_WORK:$COMMIT --build-arg BUILD_DATE=$BUILDDATE --build-arg VCS_REF=$COMMIT --build-arg VERSION=$VERSION .
     - docker tag $REPO_WORK:$COMMIT $REPO_WORK:$TAG
     - docker tag $REPO_WORK:$COMMIT $REPO_WORK:travis-$TRAVIS_BUILD_NUMBER
-    - docker tag $REPO_HASH:$COMMIT $REPO_HASH:$VERSION
+    - docker tag $REPO_WORK:$COMMIT $REPO_WORK:$VERSION
     - docker push $REPO_WORK
     - cp -avr ../../webui ./build/webcontent
     - docker build -f  Dockerfile-webui -t $REPO_WEB:$COMMIT --build-arg BUILD_DATE=$BUILDDATE --build-arg VCS_REF=$COMMIT --build-arg VERSION=$VERSION .
     - docker tag $REPO_WEB:$COMMIT $REPO_WEB:$TAG
     - docker tag $REPO_WEB:$COMMIT $REPO_WEB:travis-$TRAVIS_BUILD_NUMBER
-    - docker tag $REPO_HASH:$COMMIT $REPO_HASH:$VERSION
+    - docker tag $REPO_WEB:$COMMIT $REPO_WEB:$VERSION
     - docker push $REPO_WEB
 
 env:

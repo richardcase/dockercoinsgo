@@ -1,0 +1,39 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: worker
+  labels:
+    app: worker
+    tier: backend
+spec:
+  replicas: 1
+  # Update pods with rolling update
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: worker
+        tier: backend
+    spec:
+      containers:
+      - name: worker
+        image: richardcase/dockercoinsgo-worker:1.0.0
+        command: ["/worker", "-cert=/certs/client-worker.crt", "-key=/certs/client-worker.key", "-ca=/certs/ca.crt", "-hash-addr=hasher:50051", "-rng-addr=rng:50052", "-cache-addr=redis:6379"]
+        volumeMounts:
+        - name: certs-volume
+          mountPath: /certs
+      volumes:
+        - name: certs-volume
+          configMap:
+            name: certs-config
+            items:
+            - key: ca.crt
+              path: ca.crt
+            - key: client-worker.crt
+              path: client-worker.crt
+            - key: client-worker.key
+              path: client-worker.key

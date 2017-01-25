@@ -13,5 +13,3 @@ spec:
   selector:
     app: rng
     tier: backend
-  sessionAffinity: None
-  type: NodePort

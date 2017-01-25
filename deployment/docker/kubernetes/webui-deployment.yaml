@@ -1,10 +1,10 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: hasher
+  name: webui
   labels:
-    app: hasher
-    tier: backend
+    app: webui
+    tier: frontend
 spec:
   replicas: 1
   # Update pods with rolling update
@@ -16,16 +16,19 @@ spec:
   template:
     metadata:
       labels:
-        app: hasher
-        tier: backend
+        app: webui
+        tier: frontend
     spec:
       containers:
-      - name: rng
-        image: richardcase/dockercoinsgo-hasher:1.0.0
-        command: ["/hasher", "-cert=/certs/hasher_50051.crt", "-key=/certs/hasher_50051.key", "-ca=/certs/ca.crt", "-certhostname=hasher"]
-        volumeMounts:
-        - name: certs-volume
-          mountPath: /certs
+      - name: webui
+        image: richardcase/dockercoinsgo-webui:1.0.0
+        env:
+        - name: DCKR_CACHE_ADDR
+          value: redis:6379
+        - name: DCKR_WEB_STATIC
+          value: /webcontent/
+        - name: GIN_MODE
+          value: release
         # ReadinessProbe: indicates whether the container is ready to service requests.
         # If the ReadinessProbe fails, the endpoints controller will remove the
         # pod’s IP address from the endpoints of all services that match the pod.
@@ -37,9 +40,9 @@ spec:
         readinessProbe:
           failureThreshold: 2
           httpGet:
-            path: /health
-            port: 50051
-            scheme: HTTPS
+            path: /
+            port: 8000
+            scheme: HTTP
           initialDelaySeconds: 2
           periodSeconds: 2
           successThreshold: 1
@@ -55,24 +58,13 @@ spec:
         livenessProbe:
           failureThreshold: 3
           httpGet:
-            path: /health
-            port: 50051
-            scheme: HTTPS
+            path: /
+            port: 8000
+            scheme: HTTP
           initialDelaySeconds: 5
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 1
         # Pod (app instance) listens on this port
         ports:
-          - containerPort: 50051
-      volumes:
-        - name: certs-volume
-          configMap:
-            name: certs-config
-            items:
-            - key: ca.crt
-              path: ca.crt
-            - key: hasher_50051.crt
-              path: hasher_50051.crt
-            - key: hasher_50051.key
-              path: hasher_50051.key
+          - containerPort: 8000
