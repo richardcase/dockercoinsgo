@@ -22,7 +22,7 @@ spec:
       containers:
       - name: rng
         image: richardcase/dockercoinsgo-rng:latest
-        command: ["/rng", "-cert=/certs/rng_50052.crt", "-key=/certs/rng_50052.key", "-ca=/certs/ca.crt", "-hostname=rng"]
+        command: ["/rng", "-cert=/certs/rng_50052.crt", "-key=/certs/rng_50052.key", "-ca=/certs/ca.crt", "-certhostname=rng"]
         volumeMounts:
         - name: certs-volume
           mountPath: /certs

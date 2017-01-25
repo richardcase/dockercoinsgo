@@ -29,15 +29,17 @@ import (
 )
 
 var (
-	hasherKeyPair  *tls.Certificate
-	hasherCertPool *x509.CertPool
-	hasherPort     *int
-	hasherHostname *string
-	hasherAddr     string
-	hasherCert     *string
-	hasherKey      *string
-	hasherCA       *string
-	shutdownDelay  *int
+	hasherKeyPair      *tls.Certificate
+	hasherCertPool     *x509.CertPool
+	hasherPort         *int
+	hasherCertHostname *string
+	hasherCertAddr     string
+	hasherLocalAddr    string
+	hasherPortAddr     string
+	hasherCert         *string
+	hasherKey          *string
+	hasherCA           *string
+	shutdownDelay      *int
 )
 
 type server struct {
@@ -86,7 +88,7 @@ func grpcHandlerFunc(grpcServer *grpc.Server, otherHandler http.Handler) http.Ha
 
 func main() {
 	hasherPort := flag.Int("port", 50051, "The port number to expose the server on")
-	hasherHostname := flag.String("hostname", "localhost", "The published hostname of the service")
+	hasherCertHostname := flag.String("certhostname", "localhost", "The published hostname of the service used for the certs")
 	hasherCert := flag.String("cert", "", "[Required]. Path to the certificate for the file")
 	hasherKey := flag.String("key", "", "[Required]. Path to the certificate key")
 	hasherCA := flag.String("ca", "", "[Required]. Path to the CA file")
@@ -115,7 +117,9 @@ func main() {
 		os.Exit(2)
 	}*/
 
-	hasherAddr = fmt.Sprintf("%s:%d", *hasherHostname, *hasherPort)
+	hasherCertAddr = fmt.Sprintf("%s:%d", *hasherCertHostname, *hasherPort)
+	hasherLocalAddr = fmt.Sprintf("localhost:%d", *hasherPort)
+	hasherPortAddr = fmt.Sprintf(":%d", *hasherPort)
 
 	pair, err := certs.LoadCertificatesFromFile(*hasherCert, *hasherKey)
 	if err != nil {
@@ -143,14 +147,14 @@ func main() {
 	}()
 
 	opts := []grpc.ServerOption{
-		grpc.Creds(credentials.NewClientTLSFromCert(hasherCertPool, hasherAddr))}
+		grpc.Creds(credentials.NewClientTLSFromCert(hasherCertPool, hasherCertAddr))}
 
 	s := grpc.NewServer(opts...)
 	pb.RegisterHasherServer(s, serv)
 	ctx := context.Background()
 
 	dcreds := credentials.NewTLS(&tls.Config{
-		ServerName: hasherAddr,
+		ServerName: hasherCertAddr,
 		RootCAs:    hasherCertPool,
 	})
 	dopts := []grpc.DialOption{grpc.WithTransportCredentials(dcreds)}
@@ -159,7 +163,7 @@ func main() {
 	mux.HandleFunc("/health", serv.HealthCheck)
 
 	gwmux := runtime.NewServeMux()
-	err = pb.RegisterHasherHandlerFromEndpoint(ctx, gwmux, hasherAddr, dopts)
+	err = pb.RegisterHasherHandlerFromEndpoint(ctx, gwmux, hasherLocalAddr, dopts)
 	if err != nil {
 		fmt.Printf("serve: %v\n", err)
 		return
@@ -167,14 +171,14 @@ func main() {
 
 	mux.Handle("/", gwmux)
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *hasherPort))
+	lis, err := net.Listen("tcp", hasherPortAddr)
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 		return
 	}
 
 	srv := &http.Server{
-		Addr:    hasherAddr,
+		Addr:    hasherPortAddr,
 		Handler: grpcHandlerFunc(s, mux),
 		TLSConfig: &tls.Config{
 			Certificates: []tls.Certificate{*hasherKeyPair},

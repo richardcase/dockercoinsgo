@@ -1,27 +1,31 @@
-apiVersion: v1
-kind: ReplicationController
+apiVersion: extensions/v1beta1
+kind: Deployment
 metadata:
-  name: rng
+  name: hasher
   labels:
-    app: rng
+    app: hasher
     tier: backend
 spec:
   replicas: 1
   # Update pods with rolling update
-  #strategy:
-  #  rollingUpdate:
-  #    maxSurge: 1
-  #    maxUnavailable: 1
-  #  type: RollingUpdate
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
   template:
     metadata:
       labels:
-        app: rng
+        app: hasher
         tier: backend
     spec:
       containers:
       - name: rng
-        image: richardcase/dockercoinsgo-rng:latest
+        image: richardcase/dockercoinsgo-hasher:latest
+        command: ["/hasher", "-cert=/certs/hasher_50051.crt", "-key=/certs/hasher_50051.key", "-ca=/certs/ca.crt", "-certhostname=hasher"]
+        volumeMounts:
+        - name: certs-volume
+          mountPath: /certs
         # ReadinessProbe: indicates whether the container is ready to service requests.
         # If the ReadinessProbe fails, the endpoints controller will remove the
         # pod’s IP address from the endpoints of all services that match the pod.
@@ -34,7 +38,7 @@ spec:
           failureThreshold: 2
           httpGet:
             path: /health
-            port: 50052
+            port: 50051
             scheme: HTTPS
           initialDelaySeconds: 2
           periodSeconds: 2
@@ -52,7 +56,7 @@ spec:
           failureThreshold: 3
           httpGet:
             path: /health
-            port: 50052
+            port: 50051
             scheme: HTTPS
           initialDelaySeconds: 5
           periodSeconds: 10
@@ -60,4 +64,15 @@ spec:
           timeoutSeconds: 1
         # Pod (app instance) listens on this port
         ports:
-          - containerPort: 50052
+          - containerPort: 50051
+      volumes:
+        - name: certs-volume
+          configMap:
+            name: certs-config
+            items:
+            - key: ca.crt
+              path: ca.crt
+            - key: hasher_50051.crt
+              path: hasher_50051.crt
+            - key: hasher_50051.key
+              path: hasher_50051.key

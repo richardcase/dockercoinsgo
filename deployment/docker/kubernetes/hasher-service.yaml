@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: hasher
+    tier: backend
+  name: hasher
+spec:
+  ports:
+    - port: 50051
+      protocol: TCP
+      targetPort: 50051
+  selector:
+    app: hasher
+    tier: backend
+  sessionAffinity: None
+  type: NodePort

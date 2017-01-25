@@ -11,7 +11,7 @@ ADD ./certs/hasher_50051.crt /certs/hasher_50051.crt
 EXPOSE 50051
 
 ENTRYPOINT ["/hasher"]
-CMD ["-cert=/certs/hasher_50051.crt", "-key=/certs/hasher_50051.key", "-ca=/certs/ca.crt", "-hostname=hasher"]
+CMD ["-cert=/certs/hasher_50051.crt", "-key=/certs/hasher_50051.key", "-ca=/certs/ca.crt", "-certhostname=hasher"]
 
 # Build-time metadata as defined at http://label-schema.org
 ARG BUILD_DATE
