@@ -239,7 +239,3 @@ kind: ConfigMap
 metadata:
   creationTimestamp: 2017-01-24T16:52:21Z
   name: certs-config
-  namespace: default
-  resourceVersion: "9376"
-  selfLink: /api/v1/namespaces/default/configmaps/certs-config
-  uid: 7908cb56-e255-11e6-975f-000d3a28692b

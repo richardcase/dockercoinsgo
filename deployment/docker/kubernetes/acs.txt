@@ -7,7 +7,7 @@
 # Create a new k8s cluster
 az acs create -n dockercoins-cluster -g dockercoins -d rmc-dockercoins --orchestrator-type kubernetes
 
-# NOTE: In the future the project should use the azure redis cache
+# Create Redis cache using portal with name:  rmc-dockercoins.redis.cache.windows.net
 
 # Install kubectl
 az acs kubernetes install-cli
@@ -19,9 +19,16 @@ az acs kubernetes get-credentials --dns-prefix=rmc-dockercoins --location=westeu
 #  SET KUBECONFIG=%CD%\config
 #  kubectl get nodes
 
+# Create a namespace for the app
+kubectl create -f namespace.yaml
+
+# Set the default namespace for the following kubectl commands
+# Could also use --namespace or the CONTEXT env var
+kubectl config set-context rmc-dockercoins --namespace=dockercoins-dev
+
 # To create a config map of the certs
-kubectl create configmap certs-config --from-file=./certs
-kubectl get configmaps certs-config -o yaml > certs_config.yaml
+#kubectl create configmap certs-config --from-file=./certs
+#kubectl get configmaps certs-config -o yaml > certs_config.yaml
 # If already created import
 kubectl create -f certs_config.yaml
 
@@ -31,10 +38,12 @@ kubectl create -f hasher-deployment.yaml
 kubectl create -f rng-service.yaml
 kubectl create -f hasher-service.yaml
 
-# Create the Redis deployment and service
-# NOTE: This would use a PaaS offering like Azure Cache ideally
-kubectl create -f redis-deployment.yaml
-kubectl create -f redis-service.yaml
+# Create the Redis config and secrets
+# NOTE: Update the password in cache_secrets.yaml first
+#kubectl create secret generic cache-secrets --from-literal=password=*****REDISPASSWORD"
+#kubectl get secret cache-secrets -o yaml > cache_secrets.yaml
+kubectl create -f cache_config.yaml
+kubectl create -f cache_secrets.yaml
 
 # Create the worker deployment
 kubectl create -f worker-deployment.yaml
