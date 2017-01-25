@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: rng
-        image: richardcase/dockercoinsgo-hasher:1.0.0
+        image: richardcase/dockercoinsgo-hasher:1.1.0
         command: ["/hasher", "-cert=/certs/hasher_50051.crt", "-key=/certs/hasher_50051.key", "-ca=/certs/ca.crt", "-certhostname=hasher"]
         volumeMounts:
         - name: certs-volume

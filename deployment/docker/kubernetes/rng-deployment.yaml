@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: rng
-        image: richardcase/dockercoinsgo-rng:1.0.0
+        image: richardcase/dockercoinsgo-rng:1.1.0
         command: ["/rng", "-cert=/certs/rng_50052.crt", "-key=/certs/rng_50052.key", "-ca=/certs/ca.crt", "-certhostname=rng"]
         volumeMounts:
         - name: certs-volume
