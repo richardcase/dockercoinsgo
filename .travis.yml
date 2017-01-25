@@ -24,8 +24,9 @@ after_success:
     - export REPO_WEB=richardcase/dockercoinsgo-webui
     - export REPO_WORK=richardcase/dockercoinsgo-worker
     - export VERSION=`cat ./VERSION`
-    - echo "Version: $VERSION"
     - export BUILDDATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
+    - echo $VERSION
+    - echo $BUILDDATE
     - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
     - docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
     - cd deployment/docker/
