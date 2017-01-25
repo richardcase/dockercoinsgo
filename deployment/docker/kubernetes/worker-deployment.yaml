@@ -22,7 +22,18 @@ spec:
       containers:
       - name: worker
         image: richardcase/dockercoinsgo-worker:1.0.0
-        command: ["/worker", "-cert=/certs/client-worker.crt", "-key=/certs/client-worker.key", "-ca=/certs/ca.crt", "-hash-addr=hasher:50051", "-rng-addr=rng:50052", "-cache-addr=redis:6379"]
+        command: ["/worker", "-cert=/certs/client-worker.crt", "-key=/certs/client-worker.key", "-ca=/certs/ca.crt", "-hash-addr=hasher:50051", "-rng-addr=rng:50052", "-cache-addr=$(REDIS_URL)", "-cache-pwd=$(REDIS_PWD)"]
+        env:
+        - name: REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: cache-config
+              key: redis.url
+        - name: REDIS_PWD
+          valueFrom:
+            secretKeyRef:
+              name: cache-secrets
+              key: password
         volumeMounts:
         - name: certs-volume
           mountPath: /certs

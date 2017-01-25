@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -19,19 +20,23 @@ type Summary struct {
 }
 
 func main() {
-	staticPath := os.Getenv("DCKR_WEB_STATIC")
-	if staticPath == "" {
-		fmt.Println("You must set the DCKR_WEB_STATIC environment variable")
+	staticPath := flag.String("static-path", "", "[Required] Path to the static web contnet")
+	cacheAddress := flag.String("cache-addr", "localhost:6379", "The published address of the cache")
+	cachePassword := flag.String("cache-pwd", "", "Password to use when connecting to the cache")
+
+	flag.Parse()
+
+	if *staticPath == "" {
+		fmt.Println("You must supply the path to the static web content")
 		os.Exit(1)
 	}
 
-	cacheAddress := os.Getenv("DCKR_CACHE_ADDR")
-	if cacheAddress == "" {
-		fmt.Println("You must set the DCKR_CACHE_ADDRC environment variable")
+	if *cacheAddress == "" {
+		fmt.Println("You must supply the cache address")
 		os.Exit(1)
 	}
 
-	coinsCache, _ := cache.NewRedisCache(cacheAddress)
+	coinsCache, _ := cache.NewRedisCache(*cacheAddress, *cachePassword)
 
 	router := gin.Default()
 
@@ -48,15 +53,15 @@ func main() {
 		c.JSON(http.StatusOK, summary)
 	})
 
-	test := path.Join(staticPath, "/index.html")
+	test := path.Join(*staticPath, "/index.html")
 	fmt.Println(test)
 
-	router.StaticFile("/", path.Join(staticPath, "/index.html"))
-	router.StaticFile("/index.html", path.Join(staticPath, "/index.html"))
-	router.StaticFile("/d3.min.js", path.Join(staticPath, "/d3.min.js"))
-	router.StaticFile("/jquery-1.11.3.min.js", path.Join(staticPath, "/jquery-1.11.3.min.js"))
-	router.StaticFile("/rickshaw.min.css", path.Join(staticPath, "/rickshaw.min.css"))
-	router.StaticFile("/rickshaw.min.js", path.Join(staticPath, "/rickshaw.min.js"))
+	router.StaticFile("/", path.Join(*staticPath, "/index.html"))
+	router.StaticFile("/index.html", path.Join(*staticPath, "/index.html"))
+	router.StaticFile("/d3.min.js", path.Join(*staticPath, "/d3.min.js"))
+	router.StaticFile("/jquery-1.11.3.min.js", path.Join(*staticPath, "/jquery-1.11.3.min.js"))
+	router.StaticFile("/rickshaw.min.css", path.Join(*staticPath, "/rickshaw.min.css"))
+	router.StaticFile("/rickshaw.min.js", path.Join(*staticPath, "/rickshaw.min.js"))
 
 	router.Run(":8000")
 }

@@ -22,11 +22,18 @@ spec:
       containers:
       - name: webui
         image: richardcase/dockercoinsgo-webui:1.0.0
+        command: ["/webui", "-static-path=/webcontent/", "-cache-addr=$(REDIS_URL)", "-cache-pwd=$(REDIS_PWD)"]
         env:
-        - name: DCKR_CACHE_ADDR
-          value: redis:6379
-        - name: DCKR_WEB_STATIC
-          value: /webcontent/
+        - name: REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: cache-config
+              key: redis.url
+        - name: REDIS_PWD
+          valueFrom:
+            secretKeyRef:
+              name: cache-secrets
+              key: password
         - name: GIN_MODE
           value: release
         # ReadinessProbe: indicates whether the container is ready to service requests.

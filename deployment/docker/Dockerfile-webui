@@ -8,7 +8,8 @@ COPY ./build/webcontent/ /webcontent/
 
 EXPOSE 8000
 
-CMD ["/webui"]
+ENTRYPOINT ["/webui"]
+CMD ["-static-path=/webcontent/", "-cache-addr=redis:6379"]
 
 # Build-time metadata as defined at http://label-schema.org
 ARG BUILD_DATE
